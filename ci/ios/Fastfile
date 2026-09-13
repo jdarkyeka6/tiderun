@@ -1,5 +1,70 @@
 APP_IDENTIFIER = "com.tidegames.tiderun"
 
+def cert_limit_error?(error)
+  error.message.to_s.match?(/already have.*distribution certificate|maximum.*certificat|certificate.*limit|maximum number of distribution/i)
+end
+
+def create_distribution_certificate!(api_key:, keychain_name:, keychain_pw:)
+  cert_options = {
+    api_key: api_key,
+    generate_apple_certs: true,
+    keychain_path: File.expand_path("~/Library/Keychains/#{keychain_name}-db"),
+    keychain_password: keychain_pw
+  }
+
+  begin
+    cert(**cert_options)
+    return
+  rescue StandardError => error
+    raise unless cert_limit_error?(error)
+
+    UI.important("Apple's Distribution certificate limit is full. Revoking the oldest valid Distribution certificate and retrying.")
+  end
+
+  distribution_types = [
+    Spaceship::ConnectAPI::Certificate::CertificateType::DISTRIBUTION,
+    Spaceship::ConnectAPI::Certificate::CertificateType::IOS_DISTRIBUTION
+  ]
+
+  certificates = Spaceship::ConnectAPI::Certificate.all(
+    filter: { certificateType: distribution_types }
+  )
+
+  valid_certificates = certificates.select(&:valid?)
+  victim = valid_certificates.min_by do |certificate|
+    begin
+      Time.parse(certificate.expiration_date.to_s)
+    rescue ArgumentError, TypeError
+      Time.at(2**31 - 1)
+    end
+  end
+
+  if victim.nil?
+    UI.user_error!("Apple reported the Distribution certificate limit, but no valid Distribution certificate was available to revoke.")
+  end
+
+  label = victim.display_name.to_s.strip
+  label = victim.name.to_s.strip if label.empty?
+  label = victim.serial_number.to_s.strip if label.empty?
+  label = victim.id.to_s if label.empty?
+
+  UI.important("Revoking oldest Distribution certificate: #{label} (expires #{victim.expiration_date})")
+  victim.delete!
+
+  UI.message("Waiting 20 seconds for Apple's Developer Portal to release the certificate slot...")
+  sleep(20)
+
+  begin
+    cert(**cert_options)
+  rescue StandardError => retry_error
+    raise unless cert_limit_error?(retry_error)
+
+    UI.message("Apple still reports the certificate limit. Waiting another 40 seconds before the final retry...")
+    sleep(40)
+    cert(**cert_options)
+  end
+end
+
 default_platform(:ios)
 
 platform :ios do
@@ -46,11 +111,10 @@ platform :ios do
       lock_when_sleeps: false
     )
 
-    cert(
+    create_distribution_certificate!(
       api_key: api_key,
-      generate_apple_certs: true,
-      keychain_path: File.expand_path("~/Library/Keychains/#{keychain_name}-db"),
-      keychain_password: keychain_pw
+      keychain_name: keychain_name,
+      keychain_pw: keychain_pw
     )
 
     sigh(
