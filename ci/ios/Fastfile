@@ -1,3 +1,5 @@
+require "time"
+
 APP_IDENTIFIER = "com.tidegames.tiderun"
 
 def cert_limit_error?(error)
@@ -26,11 +28,13 @@ def create_distribution_certificate!(api_key:, keychain_name:, keychain_pw:)
     Spaceship::ConnectAPI::Certificate::CertificateType::IOS_DISTRIBUTION
   ]
 
-  certificates = Spaceship::ConnectAPI::Certificate.all(
-    filter: { certificateType: distribution_types }
-  )
+  # Apple's API currently rejects repeated certificateType query parameters,
+  # so fetch the certificate list once and filter the Distribution types here.
+  certificates = Spaceship::ConnectAPI::Certificate.all
+  valid_certificates = certificates.select do |certificate|
+    distribution_types.include?(certificate.certificate_type) && certificate.valid?
+  end
 
-  valid_certificates = certificates.select(&:valid?)
   victim = valid_certificates.min_by do |certificate|
     begin
       Time.parse(certificate.expiration_date.to_s)
