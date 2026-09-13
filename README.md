@@ -4,46 +4,59 @@ The game from the ads, except the gameplay is actually the game.
 
 ## Prototype goal
 
-The first playable loop is intentionally tiny:
-
-`drag squad → auto-fire → shoot number gates → grow army → smash enemy wave → boss`
+`drag squad → auto-fire → shoot number gates → grow army → smash enemy wave → 666 HP boss`
 
 ## Project identity
 
 - App name: **Tiderun**
 - Bundle ID: `com.tidegames.tiderun`
-- Engine: Unity
-- Platform first: iOS
-- Orientation: Portrait
-- Target: 60 FPS
+- Runtime: **Three.js + TypeScript + Vite**
+- Platform first: **iPhone / iOS**
+- Orientation: **Portrait**
+- Target: **60 FPS**
 
-## Current prototype
+## Why browser-first?
 
-The repo now contains a code-first Unity prototype. A bootstrapper creates the first level at runtime, so we do not need to hand-build prefabs before testing the mechanic.
+The development machine available right now cannot install Unity/Unreal without admin access. The game therefore runs as a lightweight WebGL build that can be deployed and tested directly on an iPhone. The same web build is intended to be wrapped for iOS later.
+
+## Current playable prototype
 
 Implemented:
 
-- forward-running squad
-- mouse/touch drag steering
-- dynamic soldier formation
+- portrait mobile layout with safe-area support
+- touch/mouse drag steering
+- constantly advancing blue squad
+- instanced soldier rendering for large crowds
 - automatic shooting
 - shoot-to-charge `+` gates
-- army growth/loss
-- enemy waves
-- boss with 666 HP
-- victory/game-over state
-- follow camera
-- debug HUD
+- `×2` gates
+- dynamic army formation up to 400 soldiers
+- four red enemy waves
+- enemy contact losses
+- 666 HP boss + boss health bar
+- victory / game-over screen
+- mobile camera follow
+- run progress + army HUD
 
-## Running it
+## Run locally
 
-1. Clone this repo.
-2. Open it in Unity.
-3. Create/open any empty 3D scene.
-4. Press Play.
+```bash
+npm install
+npm run dev
+```
 
-`TiderunBootstrap` uses `RuntimeInitializeOnLoadMethod`, so the prototype level builds itself automatically.
+Production build:
+
+```bash
+npm run build
+```
+
+The Vite base path is relative so the production build can later live inside an iOS webview/Capacitor shell without rewriting asset paths.
 
 ## Rule zero
 
 Anything shown in a Tiderun gameplay ad must actually be playable in Tiderun.
+
+## Old Unity prototype
+
+The early Unity files are still in the repository temporarily so nothing is destroyed before the browser build is tested. Once the WebGL version is confirmed working, they can be removed.
