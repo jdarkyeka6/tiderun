@@ -295,6 +295,7 @@ let cameraShake = 0;
 let running = true;
 let won = false;
 let firstInput = true;
+let laneArmed = false;
 
 type Phase = 'choice' | 'battle' | 'boss' | 'finished';
 let phase: Phase = 'choice';
@@ -941,8 +942,12 @@ function onHordeDestroyed(horde: EnemyHorde) {
 
   if (sectionIndex < specs.length) {
     activeSection = new ActiveSection(specs[sectionIndex]);
+    laneArmed = false;
+    targetX = 0;
+    hintEl.textContent = 'SWIPE LEFT / RIGHT TO CHOOSE A LANE';
+    hintEl.classList.remove('hidden');
     setPhase('choice');
-    toast('NEXT FRONT');
+    toast('CHOOSE YOUR NEXT LANE');
   } else {
     setPhase('boss');
     commander.activate();
@@ -963,7 +968,12 @@ const bulletGeometry = new THREE.BoxGeometry(0.075, 0.075, 0.7);
 const bulletMaterial = new THREE.MeshBasicMaterial({ color: 0xffed6f });
 
 function fireVolley() {
-  if (!running || army <= 0 || phase === 'finished') return;
+  if (
+    !running ||
+    army <= 0 ||
+    phase === 'finished' ||
+    (phase === 'choice' && !laneArmed)
+  ) return;
 
   const shots = Math.min(16, Math.max(1, Math.ceil(Math.sqrt(army) / 1.42)));
   const unitWeight = Math.max(1, army / shots);
@@ -1109,7 +1119,16 @@ renderer.domElement.addEventListener('pointermove', (event: PointerEvent) => {
   if (!pointerDown || !running || phase === 'finished') return;
 
   const delta = (event.clientX - pointerStartX) / Math.max(280, window.innerWidth);
-  targetX = THREE.MathUtils.clamp(pointerStartTargetX + delta * 13.5, -5.25, 5.25);
+
+  // Match the swipe direction to what feels natural from the player's view.
+  targetX = THREE.MathUtils.clamp(pointerStartTargetX - delta * 13.5, -5.25, 5.25);
+
+  // Choice phases do nothing until the player actually commits to a swipe.
+  // This prevents the game from idling through the centre lane by itself.
+  if (phase === 'choice' && Math.abs(delta) > 0.035) {
+    laneArmed = true;
+    hintEl.classList.add('hidden');
+  }
 });
 
 function releasePointer(event: PointerEvent) {
@@ -1174,5 +1193,7 @@ function frame(now: number) {
 
 syncHud();
 rebuildBlueFormation();
+laneArmed = false;
+hintEl.textContent = 'SWIPE LEFT / RIGHT TO CHOOSE A LANE';
 setPhase('choice');
 requestAnimationFrame(frame);
