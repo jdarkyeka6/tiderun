@@ -59,10 +59,10 @@ canvas {
   padding-left: 2px;
 }
 
-.stage {
+.level {
   padding: 8px 12px;
   border-radius: 999px;
-  background: rgba(6,17,30,.6);
+  background: rgba(6,17,30,.64);
   border: 1px solid rgba(255,255,255,.18);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -83,7 +83,7 @@ canvas {
   min-width: 92px;
   padding: 8px 10px 9px;
   border-radius: 14px;
-  background: rgba(5,17,29,.66);
+  background: rgba(5,17,29,.68);
   border: 1px solid rgba(255,255,255,.16);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -105,11 +105,33 @@ canvas {
   font-weight: 1000;
 }
 
+#phaseBadge {
+  position: absolute;
+  top: max(116px, calc(env(safe-area-inset-top) + 106px));
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 8px 13px;
+  border-radius: 999px;
+  background: rgba(6,17,30,.69);
+  border: 1px solid rgba(255,255,255,.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-size: 11px;
+  font-weight: 1000;
+  letter-spacing: .12em;
+  white-space: nowrap;
+  transition: opacity .16s ease;
+}
+
+#phaseBadge.quiet {
+  opacity: .58;
+}
+
 #bossWrap {
   position: absolute;
-  top: max(112px, calc(env(safe-area-inset-top) + 102px));
+  top: max(154px, calc(env(safe-area-inset-top) + 144px));
   left: 50%;
-  width: min(78vw, 360px);
+  width: min(80vw, 370px);
   transform: translate(-50%, -8px);
   opacity: 0;
   transition: opacity .2s ease, transform .2s ease;
@@ -147,25 +169,25 @@ canvas {
   transition: width .08s linear;
 }
 
-#choiceHint {
+#hint {
   position: absolute;
   left: 50%;
   bottom: max(34px, calc(env(safe-area-inset-bottom) + 22px));
   transform: translateX(-50%);
   padding: 10px 14px;
   border-radius: 999px;
-  background: rgba(5,17,29,.62);
+  background: rgba(5,17,29,.64);
   border: 1px solid rgba(255,255,255,.17);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   font-size: 12px;
   font-weight: 1000;
-  letter-spacing: .08em;
+  letter-spacing: .07em;
   white-space: nowrap;
   transition: opacity .2s ease, transform .2s ease;
 }
 
-#choiceHint.hidden {
+#hint.hidden {
   opacity: 0;
   transform: translate(-50%, 8px);
 }
@@ -178,7 +200,7 @@ canvas {
   opacity: 0;
   padding: 10px 16px;
   border-radius: 14px;
-  background: rgba(6,15,26,.74);
+  background: rgba(6,15,26,.76);
   border: 1px solid rgba(255,255,255,.18);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -202,7 +224,7 @@ canvas {
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
-  background: rgba(5,12,22,.45);
+  background: rgba(5,12,22,.47);
   backdrop-filter: blur(9px);
   -webkit-backdrop-filter: blur(9px);
   transition: opacity .22s ease;
@@ -218,7 +240,7 @@ canvas {
   width: min(86vw, 370px);
   padding: 25px 22px 22px;
   border-radius: 27px;
-  background: rgba(10,23,39,.94);
+  background: rgba(10,23,39,.95);
   border: 1px solid rgba(255,255,255,.15);
   box-shadow: 0 22px 70px rgba(0,0,0,.35);
   text-align: center;
@@ -268,9 +290,24 @@ canvas {
   cursor: pointer;
 }
 
-@media (max-height: 620px) {
-  .stats { top: max(52px, calc(env(safe-area-inset-top) + 42px)); }
-  #bossWrap { top: max(96px, calc(env(safe-area-inset-top) + 86px)); }
-  .stat { padding: 6px 9px 7px; }
-  .stat strong { font-size: 17px; }
+@media (max-height: 640px) {
+  .stats {
+    top: max(52px, calc(env(safe-area-inset-top) + 42px));
+  }
+
+  #phaseBadge {
+    top: max(101px, calc(env(safe-area-inset-top) + 91px));
+  }
+
+  #bossWrap {
+    top: max(136px, calc(env(safe-area-inset-top) + 126px));
+  }
+
+  .stat {
+    padding: 6px 9px 7px;
+  }
+
+  .stat strong {
+    font-size: 17px;
+  }
 }
