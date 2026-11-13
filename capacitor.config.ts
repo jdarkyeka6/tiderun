@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.tidegames.tiderun',
-  appName: 'Tiderun',
+  appName: 'PC Forge',
   webDir: 'dist',
   server: {
     androidScheme: 'https'
